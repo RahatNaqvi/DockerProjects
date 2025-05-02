@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app1:
+    build: ./app1
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.app1.rule: "Host(`app1.localhost`)"
+      traefik.http.services.app1.loadbalancer.server.port: '5000'
+
+  app2:
+    build: ./app2
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.app2.rule: "Host(`app2.localhost`)"
+      traefik.http.services.app2.loadbalancer.server.port: '5000'
+
+  traefik:
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+    image: traefik:v2.11
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.rule: "Host(`traefik.localhost`)"
+      traefik.http.routers.traefik.service: api@internal
+    ports:
+      - "80:80"
+      - "8090:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+
